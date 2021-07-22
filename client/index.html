@@ -1,0 +1,246 @@
+<html>
+  <head>
+    <title>stuck overflow</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="/stylesheets/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top py-3">
+      <a class="navbar-brand" href="/"
+        ><span class="nb-styling">stuck</span> overflow</a
+      >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="form-inline my-2 my-lg-0 mx-3" id="form-search" method="GET">
+          <input
+            class="form-control mr-sm-2"
+            type="search"
+            placeholder="Search ..."
+            aria-label="Search ..."
+            name="title"
+          />
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+            Search
+          </button>
+        </form>
+      </div>
+      <a href="#" class="btn btn-secondary mx-3">Log in</a>
+      <a href="/register" class="btn btn-primary">Sign up</a>
+    </nav>
+    <div class="container">
+      <div class="search-results">
+        <h1>Search Results</h1>
+      </div>
+      <div class="results py-4">
+        <p>Results for Bootstrap</p>
+      </div>
+      <div class="total-results border-bottom pb-4">
+        <h3>500 results</h3>
+      </div>
+      <div id="search"></div>
+      <div id="results"></div>
+    </div>
+
+    <div class="container" id="ask-form">
+      <button class="btn btn-primary mb-4 mt-2" id="btn-ask-question">
+        Ask Question
+      </button>
+      <form class="form-horizontal" id="form-data" style="display: none">
+        <div class="row">
+          <label for="" class="col-sm-2 control-label">Title</label>
+          <input
+            type="text"
+            class="col-sm-3 form-control"
+            name="title"
+            id="title"
+          />
+        </div>
+        <textarea name="description" id="description"></textarea>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button type="button" class="btn btn-warning" id="btn-cancel">
+          <i class="fas fa-times"></i>
+        </button>
+      </form>
+    </div>
+
+    <div class="footer mt-2 border-top">
+      <p class="py-1">Rifky Ardiansyah</p>
+    </div>
+    <script src="ckeditor/ckeditor.js"></script>
+    <script type="text/javascript">
+      CKEDITOR.replace("description");
+
+      $(document).ready(function () {
+        loadData();
+
+        $("#form-data").submit(function (event) {
+          event.preventDefault();
+          saveData();
+        });
+        $("#form-search").submit(function (event) {
+          event.preventDefault();
+          $("#results").hide()
+          searchQuestion();
+        });
+        $("#btn-ask-question").click(function () {
+          $("#form-data").show();
+          $(this).hide();
+        });
+        $("#btn-cancel").click(function () {
+          $("#form-data").hide();
+          $("#btn-ask-question").show();
+        });
+
+        $("#results").on("click", ".title-question", function (e) {
+          e.preventDefault();
+          let id = $(this).attr("iddata");
+          localStorage.setItem("idselected", id);
+          window.location = "/question.html";
+        });
+      });
+
+      function saveData() {
+        const title = $("#title").val();
+        let token = localStorage.getItem("token");
+
+        var xmlhttp = new XMLHttpRequest();
+
+        $.ajax({
+          method: "POST",
+          url: "http://localhost:3000/questions",
+          data: {
+            title,
+            description: CKEDITOR.instances.description.getData(),
+          },
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function () {
+          $("#form-data").trigger("reset");
+          $("#form-data").hide();
+          $("#btn-ask-question").show();
+        });
+      }
+
+      function loadData() {
+        let token = localStorage.getItem("token");
+        let html = ``;
+        $.ajax({
+          method: "GET",
+          url: "http://localhost:3000/questions",
+          dataType: "json",
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          data.forEach((item) => {
+            html += `
+                        <div class="row my-4 border-bottom">
+                          <div class="col-sm-2">
+                            <button class="btn d-block mb-4" type="button"><i class="fas fa-sort-up"></i></button>
+          <span class="d-block votes-styling">939</span>
+          <button class="btn d-block my-4" type="button"><i class="fas fa-sort-down"></i></button>
+                           
+                            <span class="d-block my-4">25 answers</span>
+                          </div>
+                          <div class="col-sm-10">
+                            <div class="title mt-4 mb-2">
+                              <a class="title-question" iddata="${item.id}" href="#">Q: ${item.title}</a>
+                            </div>
+                            <div class="description">
+                              ${item.description}
+                            </div>
+                          </div>
+                       </div> 
+            `;
+          });
+          $("#results").html(html);
+        });
+      }
+
+      function searchQuestion() {
+        let html = ``;
+        $.ajax({
+          method: "GET",
+          url: "http://localhost:3000/questions/search",
+          dataType: "json",
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          
+            html += `
+                        <div class="row my-4 border-bottom">
+                          <div class="col-sm-2">
+                            <button class="btn d-block mb-4" type="button"><i class="fas fa-sort-up"></i></button>
+          <span class="d-block votes-styling">939</span>
+          <button class="btn d-block my-4" type="button"><i class="fas fa-sort-down"></i></button>
+                           
+                            <span class="d-block my-4">25 answers</span>
+                          </div>
+                          <div class="col-sm-10">
+                            <div class="title mt-4 mb-2">
+                              <a class="title-question" iddata="${data[0].id}" href="#">Q: ${data[0].title}</a>
+                            </div>
+                            <div class="description">
+                              ${data[0].description}
+                            </div>
+                          </div>
+                       </div> 
+            `;
+         
+          $("#search").html(html);
+        });
+      }
+    </script>
+  </body>
+</html>

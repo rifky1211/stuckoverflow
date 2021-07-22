@@ -1,0 +1,125 @@
+<html>
+  <head>
+    <title>stuck overflow</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="/stylesheets/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top py-3">
+      <a class="navbar-brand" href="/"
+        ><span class="nb-styling">stuck</span> overflow</a
+      >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="form-inline my-2 my-lg-0 mx-3">
+          <input
+            class="form-control mr-sm-2"
+            type="search"
+            placeholder="Search ..."
+            aria-label="Search ..."
+          />
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+            Search
+          </button>
+        </form>
+      </div>
+      <a href="#" class="btn btn-secondary mx-3">Log in</a>
+      <a href="#" class="btn btn-primary">Sign up</a>
+    </nav>
+
+    <div class="container" id="form-register">
+      <form class="form-horizontal" id="form-data">
+        <div class="row">
+          <label for="email" class="col-sm-2 control-label">Email</label>
+          <input
+            type="email"
+            class="col-sm-3 form-control"
+            name="email"
+            id="email"
+            required
+          />
+        </div>
+        <div class="row">
+            <label for="password" class="col-sm-2 control-label">Password</label>
+            <input
+              type="password"
+              class="col-sm-3 form-control"
+              name="password"
+              id="password"
+              required
+            />
+          </div>
+          <div class="row">
+            <label for="fullname" class="col-sm-2 control-label">Fullname</label>
+            <input
+              type="text"
+              class="col-sm-3 form-control"
+              name="fullname"
+              id="fullname"
+              required
+            />
+          </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+        </button>
+      </form>
+    </div>
+
+    <div class="footer mt-2 border-top">
+      <p class="py-1">Rifky Ardiansyah</p>
+    </div>
+    <script>
+      $(document).ready(function(){
+        $("#form-data").submit(function(event){
+          event.preventDefault()
+          saveUser()
+        });
+      })
+
+      function saveUser(){
+        const email = $("#email").val();
+        const password = $("#password").val();
+        const fullname = $("#fullname").val();
+
+        var xmlhttp = new XMLHttpRequest();
+
+        $.ajax({
+          method: "POST",
+          url: "http://localhost:3000/users",
+          data: { email, password, fullname },
+        }).done(function () {
+          window.location = "/index.html"
+        });
+      }
+    </script>
+  </body>
+</html>

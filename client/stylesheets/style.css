@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+a {
+  color: #00B7FF; 
+}
+
+.navbar-brand span{
+  font-size: 30px;
+  font-weight: 300;
+}
+.navbar-brand{
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.search-results{
+  margin-top: 100px;
+}
+
+.search-results h1{
+  font-weight: 400;
+}
+
+.results p{
+  font-size: 18px;
+  font-weight: 200;
+}
+
+.total-results h3{
+  font-size: 25px;
+  font-weight: 300;
+}
+.title {
+  font-size: 28px;
+}
+.title a {
+  text-decoration: none;
+}
+
+
+.description {
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.votes-styling{
+  font-size: 30px;
+}
+
+.footer {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: black;
+  text-align: center;
+}
+
+#form-register{
+  margin-top: 120px;
+}

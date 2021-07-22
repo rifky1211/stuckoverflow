@@ -1,0 +1,261 @@
+<html>
+  <head>
+    <title>stuck overflow</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="/stylesheets/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top py-3">
+      <a class="navbar-brand" href="/"
+        ><span class="nb-styling">stuck</span> overflow</a
+      >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="form-inline my-2 my-lg-0 mx-3">
+          <input
+            class="form-control mr-sm-2"
+            type="search"
+            placeholder="Search ..."
+            aria-label="Search ..."
+          />
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+            Search
+          </button>
+        </form>
+      </div>
+      <a href="#" class="btn btn-secondary mx-3">Log in</a>
+      <a href="#" class="btn btn-primary">Sign up</a>
+    </nav>
+    <div class="container" id="content-question"></div>
+    <div class="container">
+      <h3>25 Answers</h3>
+      <div id="content-answers"></div>
+      <div class="container" id="ask-form">
+        <button class="btn btn-primary mb-4 mt-2" id="btn-ask-question">
+          Answer
+        </button>
+        <form class="form-horizontal" id="form-data" style="display: none">
+          <textarea name="description" id="description"></textarea>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button type="button" class="btn btn-warning" id="btn-cancel">
+            <i class="fas fa-times"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    <script src="ckeditor/ckeditor.js"></script>
+
+    <script type="text/javascript">
+      CKEDITOR.replace("description");
+
+      $(document).ready(function () {
+        loadData();
+        loadAnswers();
+        $("#form-data").submit(function (event) {
+          event.preventDefault();
+          saveAnswer();
+          loadAnswers();
+        });
+
+        $("#btn-ask-question").click(function () {
+          $("#form-data").show();
+          $(this).hide();
+        });
+
+        $("#btn-cancel").click(function () {
+          $("#form-data").hide();
+          $("#btn-ask-question").show();
+        });
+
+        $("#content-answers").on("click", ".voteup", function(e){
+          e.preventDefault()
+          $.ajax({
+          method: "PUT",
+          url: `http://localhost:3000/answers/vote`,
+          data: {idAnswer: $(this).attr("dataid")},
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          if(data.success){
+            alert("berhasil vote")
+            loadAnswers()
+          }else{
+            alert(data.message)
+          }
+        })
+        })
+
+        $("#content-answers").on("click", ".votedown", function(e){
+          e.preventDefault()
+          $.ajax({
+          method: "PUT",
+          url: `http://localhost:3000/answers/votedown/vote`,
+          data: {idAnswer: $(this).attr("dataid")},
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          if(data.success){
+            alert("berhasil vote")
+            loadAnswers()
+          }else{
+            alert(data.message)
+          }
+        })
+        })
+      });
+
+      function loadData() {
+        var id = localStorage.getItem("idselected");
+
+        let html = ``;
+        $.ajax({
+          method: "GET",
+          url: `http://localhost:3000/questions/${id}`,
+          dataType: "json",
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          html = `
+          <div class="search-results border-bottom pb-3">
+        <h1>${data[0].title}</h1>
+      </div>
+      <div class="row my-4 border-bottom">
+        <div class="col-sm-2">
+          <button class="btn d-block mb-4" type="button"><i class="fas fa-sort-up"></i></button>
+          <span class="d-block votes-styling">939</span>
+          <button class="btn d-block my-4" type="button"><i class="fas fa-sort-down"></i></button>
+        </div>
+        <div class="col-sm-10">
+          
+          <div class="description">
+            ${data[0].description}
+          </div>
+        </div>
+      </div>
+          `;
+          $("#content-question").html(html);
+        });
+      }
+
+      function loadAnswers() {
+        var id = localStorage.getItem("idselected");
+
+        let html = ``;
+        $.ajax({
+          method: "GET",
+          url: `http://localhost:3000/answers/${id}`,
+          dataType: "json",
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          data.forEach((item) => {
+            html += `
+          <div class="row my-4 border-bottom">
+          <div class="col-sm-2">
+            <a class="btn d-block mb-4 voteup" dataid="${item.id}">
+              <i class="fas fa-sort-up"></i>
+            </a>
+            <span class="d-block votes-styling">${item.vote.count}</span>
+            <a class="btn d-block my-4 votedown" dataid="${item.id}">
+              <i class="fas fa-sort-down"></i>
+            </a>
+          </div>
+          <div class="col-sm-10">
+            <div class="description">${item.answer}</div>
+          </div>
+        </div>
+                  `;
+          });
+          $("#content-answers").html(html);
+        });
+      }
+      function saveAnswer() {
+        var id = localStorage.getItem("idselected");
+
+        var xmlhttp = new XMLHttpRequest();
+
+        $.ajax({
+          method: "POST",
+          url: "http://localhost:3000/answers",
+          data: {
+            answer: CKEDITOR.instances.description.getData(),
+            vote: {},
+            QuestionId: id,
+          },
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function () {
+          $("#form-data").trigger("reset");
+          $("#form-data").hide();
+          $("#btn-ask-question").show();
+        });
+      }
+    </script>
+  </body>
+</html>
