@@ -40,24 +40,26 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <form class="form-inline my-2 my-lg-0 mx-3">
+        <form class="form-inline my-2 my-lg-0 mx-3" id="form-search">
           <input
             class="form-control mr-sm-2"
             type="search"
             placeholder="Search ..."
             aria-label="Search ..."
+            name="title"
+            id="title"
           />
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
             Search
           </button>
         </form>
       </div>
-      <a href="#" class="btn btn-secondary mx-3">Log in</a>
-      <a href="#" class="btn btn-primary">Sign up</a>
+      <a href="/login" class="btn btn-secondary mx-3">Log in</a>
+      <a href="/register" class="btn btn-primary">Sign up</a>
     </nav>
     <div class="container" id="content-question"></div>
     <div class="container">
-      <h3>25 Answers</h3>
+      
       <div id="content-answers"></div>
       <div class="container" id="ask-form">
         <button class="btn btn-primary mb-4 mt-2" id="btn-ask-question">
@@ -88,6 +90,12 @@
           loadAnswers();
         });
 
+        $("#form-search").submit(function (event) {
+          event.preventDefault();
+          window.location = "/index.html"
+          searchQuestion();
+        });
+
         $("#btn-ask-question").click(function () {
           $("#form-data").show();
           $(this).hide();
@@ -102,8 +110,8 @@
           e.preventDefault()
           $.ajax({
           method: "PUT",
-          url: `http://localhost:3000/answers/vote`,
-          data: {idAnswer: $(this).attr("dataid")},
+          url: `http://localhost:3000/answers/vote/answer`,
+          data: {idAnswer: $(this).attr("dataid"), isVote: 'up'},
           beforeSend: function (xhr) {
             if (!localStorage.getItem("token")) {
               window.location = "/login";
@@ -127,8 +135,8 @@
           e.preventDefault()
           $.ajax({
           method: "PUT",
-          url: `http://localhost:3000/answers/votedown/vote`,
-          data: {idAnswer: $(this).attr("dataid")},
+          url: `http://localhost:3000/answers/vote/answer`,
+          data: {idAnswer: $(this).attr("dataid"), isVote: 'down'},
           beforeSend: function (xhr) {
             if (!localStorage.getItem("token")) {
               window.location = "/login";
@@ -168,14 +176,14 @@
           },
         }).done(function (data) {
           html = `
+          
           <div class="search-results border-bottom pb-3">
         <h1>${data[0].title}</h1>
       </div>
       <div class="row my-4 border-bottom">
         <div class="col-sm-2">
-          <button class="btn d-block mb-4" type="button"><i class="fas fa-sort-up"></i></button>
-          <span class="d-block votes-styling">939</span>
-          <button class="btn d-block my-4" type="button"><i class="fas fa-sort-down"></i></button>
+          <span class="d-block votes-styling">${data[0].vote.count} Votes</span>
+          <span class="d-block votes-styling mt-4">${data[0].Answers.length} Answers</span>
         </div>
         <div class="col-sm-10">
           
@@ -238,7 +246,7 @@
           url: "http://localhost:3000/answers",
           data: {
             answer: CKEDITOR.instances.description.getData(),
-            vote: {},
+            vote: { count: 0, voter: [] },
             QuestionId: id,
           },
           beforeSend: function (xhr) {
@@ -254,6 +262,48 @@
           $("#form-data").trigger("reset");
           $("#form-data").hide();
           $("#btn-ask-question").show();
+          loadAnswers()
+        });
+      }
+
+      function searchQuestion() {
+        const title = $("#title").val();
+        let html = ``;
+        $.ajax({
+          method: "GET",
+          url: "http://localhost:3000/questions/search/question",
+          data: { title },
+          beforeSend: function (xhr) {
+            if (!localStorage.getItem("token")) {
+              window.location = "/login";
+            }
+            xhr.setRequestHeader(
+              "x-access-token",
+              localStorage.getItem("token")
+            );
+          },
+        }).done(function (data) {
+          html += `
+                        <div class="row my-4 border-bottom">
+                          <div class="col-sm-2">
+                            <a class="btn d-block mb-4 voteup" idquestion="${data.id}"><i class="fas fa-sort-up"></i></a>
+          <span class="d-block votes-styling">${data.vote.count}</span>
+          <a class="btn d-block my-4 votedown" idquestion="${data.id}"><i class="fas fa-sort-down"></i></a>
+                           
+                            <span class="d-block my-4">25 answers</span>
+                          </div>
+                          <div class="col-sm-10">
+                            <div class="title mt-4 mb-2">
+                              <a class="title-question" iddata="${data.id}" href="#">Q: ${data.title}</a>
+                            </div>
+                            <div class="description">
+                              ${data.description}
+                            </div>
+                          </div>
+                       </div> 
+            `;
+
+          $("#search").html(html);
         });
       }
     </script>
